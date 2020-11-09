@@ -10,8 +10,8 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
     name = "ltd_fox_hound_rules_helm",
     strip_prefix = "rules_helm-0.0.1",
-    urls = ["https://github.com/fox-hound-ltd/rules_helm/archive/v0.0.1.tar.gz"],
-    sha256 = "be2747a006ab09810eda054733098cc5d5b526e3abc2e28d375b3c86003ada12",
+    urls = ["https://github.com/fox-hound-ltd/rules_helm/releases/download/v0.0.1/rules_helm-0.0.1.tar.gz"],
+    sha256 = "2c0f0e2d54a80ccb08028ab97ad3decd65dc4403ecd5994fcd6310379cf8142b",
 )
 
 load("@ltd_fox_hound_rules_helm//:index.bzl", "helm_chart", "helm_repositories")
