@@ -1,0 +1,151 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+
+package(default_visibility = ["//visibility:private"])
+
+licenses(["notice"])  # Apache 2.0
+
+platform(
+    name = "darwin_amd64",
+    constraint_values = [
+        "@bazel_tools//platforms:osx",
+        "@bazel_tools//platforms:x86_64",
+    ],
+)
+
+platform(
+    name = "linux_amd64",
+    constraint_values = [
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:x86_64",
+    ],
+)
+
+platform(
+    name = "linux_arm64",
+    constraint_values = [
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:aarch64",
+    ],
+)
+
+platform(
+    name = "windows_amd64",
+    constraint_values = [
+        "@bazel_tools//platforms:windows",
+        "@bazel_tools//platforms:x86_64",
+    ],
+)
+
+platform(
+    name = "linux_s390x",
+    constraint_values = [
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:s390x",
+    ],
+)
+
+bzl_library(
+    name = "bzl",
+    srcs = glob(["*.bzl"]),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "package_contents",
+    srcs = glob(["*"]),
+    visibility = ["//:__pkg__"],
+)
+
+# node toolchain type
+toolchain_type(name = "toolchain_type")
+
+# Allow targets to use a toolchains attribute, such as sh_binary and genrule
+# This way they can reference the HELM_PATH make variable.
+alias(
+    name = "toolchain",
+    actual = select({
+        "@bazel_tools//src/conditions:darwin": "@helm_darwin_amd64_config//:toolchain",
+        "@bazel_tools//src/conditions:darwin_x86_64": "@helm_darwin_amd64_config//:toolchain",
+        "@bazel_tools//src/conditions:linux_aarch64": "@helm_linux_arm64_config//:toolchain",
+        "@bazel_tools//src/conditions:linux_s390x": "@helm_linux_s390x_config//:toolchain",
+        "@bazel_tools//src/conditions:linux_x86_64": "@helm_linux_amd64_config//:toolchain",
+        "@bazel_tools//src/conditions:windows": "@helm_windows_amd64_config//:toolchain",
+        "//conditions:default": "@helm_linux_amd64_config//:toolchain",
+    }),
+    visibility = ["//visibility:public"],
+)
+
+# Allow targets to declare a dependency on the node binary for the current host platform
+alias(
+    name = "helm_bin",
+    actual = select({
+        "@bazel_tools//src/conditions:darwin": "@helm_darwin_amd64//:helm_bin",
+        "@bazel_tools//src/conditions:darwin_x86_64": "@helm_darwin_amd64//:helm_bin",
+        "@bazel_tools//src/conditions:linux_aarch64": "@helm_linux_arm64//:helm_bin",
+        "@bazel_tools//src/conditions:linux_s390x": "@helm_linux_s390x//:helm_bin",
+        "@bazel_tools//src/conditions:linux_x86_64": "@helm_linux_amd64//:helm_bin",
+        "@bazel_tools//src/conditions:windows": "@helm_windows_amd64//:helm_bin",
+        "//conditions:default": "@helm_linux_amd64//:helm_bin",
+    }),
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "test",
+    actual = ":ddd",
+)
+
+filegroup(
+    name = "ddd",
+    srcs = ["BUILD.tpl"],
+)
+
+toolchain(
+    name = "helm_linux_amd64_toolchain",
+    target_compatible_with = [
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:x86_64",
+    ],
+    toolchain = "@helm_linux_amd64_config//:toolchain",
+    toolchain_type = ":toolchain_type",
+)
+
+toolchain(
+    name = "helm_linux_arm64_toolchain",
+    target_compatible_with = [
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:aarch64",
+    ],
+    toolchain = "@helm_linux_arm64_config//:toolchain",
+    toolchain_type = ":toolchain_type",
+)
+
+toolchain(
+    name = "helm_darwin_amd64_toolchain",
+    target_compatible_with = [
+        "@bazel_tools//platforms:osx",
+        "@bazel_tools//platforms:x86_64",
+    ],
+    toolchain = "@helm_darwin_amd64_config//:toolchain",
+    toolchain_type = ":toolchain_type",
+)
+
+toolchain(
+    name = "helm_windows_amd64_toolchain",
+    target_compatible_with = [
+        "@bazel_tools//platforms:windows",
+        "@bazel_tools//platforms:x86_64",
+    ],
+    toolchain = "@helm_windows_amd64_config//:toolchain",
+    toolchain_type = ":toolchain_type",
+)
+
+toolchain(
+    name = "helm_linux_s390x_toolchain",
+    target_compatible_with = [
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:s390x",
+    ],
+    toolchain = "@helm_linux_s390x_config//:toolchain",
+    toolchain_type = ":toolchain_type",
+)

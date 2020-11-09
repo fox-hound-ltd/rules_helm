@@ -1,0 +1,21 @@
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
+load("//:index.bzl", "helm_version")
+
+package(default_visibility = ["//visibility:public"])
+
+helm_version(
+    name = "version",
+)
+
+pkg_tar(
+    name = "release",
+    srcs = glob(["*.bzl"]) + [
+        "BUILD.bazel",
+        "//toolchains/helm:package_contents",
+        "//internal/common:package_contents",
+        "//internal/helm:package_contents",
+    ],
+    extension = "tar.gz",
+    strip_prefix = "./",
+    tags = ["manual"],
+)
