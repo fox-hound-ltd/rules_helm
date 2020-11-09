@@ -90,16 +90,6 @@ alias(
     visibility = ["//visibility:public"],
 )
 
-alias(
-    name = "test",
-    actual = ":ddd",
-)
-
-filegroup(
-    name = "ddd",
-    srcs = ["BUILD.tpl"],
-)
-
 toolchain(
     name = "helm_linux_amd64_toolchain",
     target_compatible_with = [

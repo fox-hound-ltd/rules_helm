@@ -8,7 +8,7 @@ helm_version(
 )
 
 pkg_tar(
-    name = "release",
+    name = "rules_helm-0.0.1",
     srcs = glob(["*.bzl"]) + [
         "BUILD.bazel",
         "//toolchains/helm:package_contents",
@@ -16,6 +16,7 @@ pkg_tar(
         "//internal/helm:package_contents",
     ],
     extension = "tar.gz",
-    strip_prefix = "./",
+    strip_prefix = ".",
+    package_dir = "rules_helm-0.0.1",
     tags = ["manual"],
 )
