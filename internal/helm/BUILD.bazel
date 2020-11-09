@@ -1,4 +1,5 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load(":helm.bzl", "helm_template")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -14,4 +15,11 @@ filegroup(
         "BUILD.bazel",
     ],
     visibility = ["//:__pkg__"],
+)
+
+helm_template(
+    name = "template_test",
+    chart_tar = "@jenkins//:chart",
+    namespace = "test",
+    release_name = "jenkins",
 )

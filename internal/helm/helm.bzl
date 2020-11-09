@@ -77,3 +77,53 @@ helm_upgrade = rule(
     toolchains = ["@ltd_fox_hound_rules_helm//toolchains/helm:toolchain_type"],
     executable = True,
 )
+
+def _helm_template_impl(ctx):
+    args = [
+        ctx.attr.name if ctx.attr.release_name == "" else ctx.attr.release_name,
+        ctx.file.chart_tar.path,
+    ]
+    inputs = [ctx.file.chart_tar]
+    options = []
+
+    if len(ctx.attr.namespace) > 0:
+        options.append("--namespace %s" % ctx.attr.namespace)
+    for variable, value in ctx.attr.values.items():
+        options.append("--set %s=%s" % (variable, value))
+    if ctx.file.values_yaml_file != None:
+        inputs.append(ctx.file.values_yaml_file)
+        options.append("--values %s" % ctx.file.values_yaml_file.path)
+
+    out = ctx.actions.declare_file(ctx.attr.name + ".yaml")
+    ctx.actions.run_shell(
+        tools = [ctx.executable.helm_tool],
+        inputs = inputs,
+        outputs = [out],
+        progress_message = "Rendering Helm chart for %s" % ctx.file.chart_tar.path,
+        command = "%s %s %s %s > %s" % (
+            ctx.executable.helm_tool.path,
+            "template",
+            " ".join(args),
+            " ".join(options),
+            out.path,
+        ),
+    )
+    return [DefaultInfo(files = depset([out]))]
+
+helm_template = rule(
+    implementation = _helm_template_impl,
+    attrs = {
+        "chart_tar": attr.label(allow_single_file = True, mandatory = True),
+        "release_name": attr.string(),
+        "namespace": attr.string(),
+        "values": attr.string_dict(),
+        "values_yaml_file": attr.label(allow_single_file = True),
+        "options": attr.string_list(default = []),
+        "helm_tool": attr.label(
+            executable = True,
+            cfg = "host",
+            allow_single_file = True,
+            default = Label("@helm//:helm"),
+        ),
+    },
+)
